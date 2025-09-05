@@ -98,10 +98,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Student(models.Model):
     name = models.CharField(max_length=100, blank=False)
-    gmail = models.EmailField(unique=True)
-    id_no = models.IntegerField(unique=True, primary_key=True)
-    class_year = models.IntegerField(default=0)
-    
+    rollNo = models.IntegerField()
+    gmail = models.EmailField(unique=True,primary_key=True)
+    idNo = models.CharField(max_length=7,unique=True)
+    section = models.IntegerField(default=0)
+
+    GENDER = [
+        ('Female', 'Female'),
+        ('Male', 'Male'),
+    ]
+
+    gender = models.CharField(max_length=6, choices=GENDER, blank=True)
+
     BRANCH_CHOICES = [
         ('CSE', 'Computer Science and Engineering'),
         ('ECE', 'Electronics and Communication Engineering'),
@@ -111,21 +119,21 @@ class Student(models.Model):
     ]
     branch = models.CharField(max_length=5, choices=BRANCH_CHOICES, blank=True)
 
-    father_name = models.CharField(max_length=100, blank=True)
-    mother_name = models.CharField(max_length=100, blank=True)
-    hall_ticket_no = models.CharField(max_length=20, unique=True)
+    fatherName = models.CharField(max_length=100, blank=True)
+    motherName = models.CharField(max_length=100, blank=True)
+    hallTicketNo = models.CharField(max_length=20, unique=True)
     address = models.TextField(blank=True)
-    phone_number = models.CharField(max_length=10, blank=False)
-    parent_phone_number = models.CharField(max_length=10,blank=True)
+    studentMobile = models.CharField(max_length=10, blank=False)
+    parentMobile = models.CharField(max_length=10,blank=True)
     guardian = models.BooleanField(default=False)
+    batch = models.CharField(max_length=3)
     
     # Hostel information
-    hostel_name = models.CharField(max_length=100, blank=True)
-    room_no = models.CharField(max_length=10, blank=True)
+    hostelName = models.CharField(max_length=100, blank=True)
+    roomNo = models.CharField(max_length=10, blank=True)
     
-    blood_group = models.CharField(max_length=5, blank=True)
-    year = models.IntegerField()
-    date_of_birth = models.DateField(blank=True, null=True)
+    bloodGroup = models.CharField(max_length=5, blank=True)
+    dob = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return self.gmail
