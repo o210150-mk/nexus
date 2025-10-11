@@ -20,6 +20,7 @@ ROLES = {
     'DEAN': 'Dean',
     'DSW': 'DSW',
     'DIRECTOR': 'Director',
+    'ADMIN' : 'Admin'
 }
 
 class CustomUserManager(BaseUserManager):
@@ -79,7 +80,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['role', 'default_password'] 
+    REQUIRED_FIELDS = ['role'] 
 
     objects = CustomUserManager()
 
@@ -126,6 +127,48 @@ class Student(models.Model):
     studentMobile = models.CharField(max_length=10, blank=False)
     parentMobile = models.CharField(max_length=10,blank=True)
     guardian = models.BooleanField(default=False)
+    batch = models.CharField(max_length=3, default = 0)
+    
+    # Hostel information
+    hostelName = models.CharField(max_length=100, blank=True)
+    roomNo = models.CharField(max_length=10, blank=True)
+    
+    bloodGroup = models.CharField(max_length=5, blank=True)
+    dob = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return self.gmail
+    
+class Student_temp(models.Model):
+    name = models.CharField(max_length=100, blank=False)
+    rollNo = models.IntegerField()
+    gmail = models.EmailField(unique=True,primary_key=True)
+    idNo = models.CharField(max_length=7,unique=True)
+    section = models.IntegerField(default=0)
+
+    GENDER = [
+        ('Female', 'Female'),
+        ('Male', 'Male'),
+    ]
+
+    gender = models.CharField(max_length=6, choices=GENDER, blank=True)
+
+    BRANCH_CHOICES = [
+        ('CSE', 'Computer Science and Engineering'),
+        ('ECE', 'Electronics and Communication Engineering'),
+        ('EEE', 'Electrical and Electronics Engineering'),
+        ('MECH', 'Mechanical Engineering'),
+        ('CIVIL', 'Civil Engineering'),
+    ]
+    branch = models.CharField(max_length=5, choices=BRANCH_CHOICES, blank=True)
+
+    fatherName = models.CharField(max_length=100, blank=True)
+    motherName = models.CharField(max_length=100, blank=True)
+    hallTicketNo = models.CharField(max_length=20, unique=True)
+    address = models.TextField(blank=True)
+    studentMobile = models.CharField(max_length=10, blank=False)
+    parentMobile = models.CharField(max_length=10,blank=True)
+    guardian = models.BooleanField(default=False)
     batch = models.CharField(max_length=3)
     
     # Hostel information
@@ -137,3 +180,5 @@ class Student(models.Model):
 
     def __str__(self):
         return self.gmail
+    
+    

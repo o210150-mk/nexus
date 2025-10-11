@@ -9,3 +9,14 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = '__all__'
+        
+class ExcelUploadSerializer(serializers.Serializer):
+    excel_file = serializers.FileField()
+
+class SampleSerializer(serializers.Serializer):
+    text = serializers.CharField(max_length = 120)
+
+class StudentTempSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = '__all__'
