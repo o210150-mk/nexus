@@ -20,3 +20,13 @@ class StudentTempSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = '__all__'
+    
+class GetMailSerializer(serializers.Serializer):
+    gmail = serializers.EmailField()
+
+class VerifySerializer(serializers.Serializer):
+    otp = serializers.CharField(max_length = 6)
+
+class getPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length = 15)
+    gmail = serializers.EmailField()

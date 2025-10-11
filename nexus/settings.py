@@ -59,7 +59,7 @@ ROOT_URLCONF = 'nexus.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -148,6 +148,17 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False
 
 AUTH_USER_MODEL = 'student.CustomUser'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'rguktnexus@gmail.com' # Your actual Gmail address
+EMAIL_HOST_PASSWORD = 'obvzthwxhrhglkmo' # The 16-character App Password
+
+# This is the default email address that Django will use for system emails
+DEFAULT_FROM_EMAIL = 'rguktnexus@gmail.com' 
 
 # add1 end
 

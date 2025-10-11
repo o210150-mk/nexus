@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import render
 import pandas as pd
 from rest_framework.views import APIView
@@ -10,7 +11,7 @@ from rest_framework import status
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 # class ReactView(APIView):
   
@@ -69,7 +70,6 @@ class LogView(APIView):
         else:
             return Response({'error': 'Invalid credentials','is_authenticated':False}, status=status.HTTP_401_UNAUTHORIZED)
     def get(self, request):
-        print(request.user)
         if request.user.is_authenticated:
             return Response({
                 'is_authenticated':True,
@@ -163,5 +163,121 @@ class CreateUsers(APIView):
             )
             user.save()
         return Response({'message':f"Successfully created : User Logins"})
-        
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string 
+from django.conf import settings
+from django.utils.html import strip_tags
+from django.core.mail import send_mail
 
+class GetMail(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer_class = GetMailSerializer(data = request.data)
+        if serializer_class.is_valid():
+            gmail = serializer_class.validated_data['gmail']
+            subject = 'Your HTML Welcome'
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to = [gmail]
+#             result = send_mail(
+
+#   'Reset Password',
+
+#   f"This is 6 digit otp {123456} to reset the password.",
+
+#   settings.EMAIL_HOST_USER, # Sender must be your configured Gmail address
+
+#   [gmail], # Your actual recipient address
+
+#   fail_silently=False, # Crucial: forces an exception if the SMTP connection fails
+
+# )
+    # Render HTML template (assuming you have one at 'email/welcome.html')
+    # Or you can define the HTML directly as a string
+            # html_content = render_to_string('templates/mail.html', {'username': 'User'})
+            otp = random.randint(100000, 999999)
+            request.session['otp'] = otp
+            request.session.save()
+            html_content = render_to_string('mail.html', {'username': gmail, 'otp':otp})
+    # # Create a plain text version for non-HTML email clients
+            text_content = strip_tags(html_content) 
+
+    # # 2. Create the message object
+            msg = EmailMultiAlternatives('Password Reset', f"This is the 6 digit otp to rest your password", from_email, to)
+    
+    # # 3. Attach the HTML version
+            msg.attach_alternative(html_content, "text/html")
+    
+    # # 4. Send the email
+            msg.send(fail_silently=False)
+            return Response({'message':'Mail sent successfully...'})
+        return Response({'message':'Error...'})
+    
+class VerifyOtp(APIView):
+    def post(self, request):
+        serializer_class = VerifySerializer(data = request.data)
+        if serializer_class.is_valid():
+            otp = serializer_class.validated_data['otp']
+            if otp == str(request.session['otp']):
+                return Response({'message':'Successfully Verified'})
+            else:
+                return Response(
+                {"detail": "Invalid OTP"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class UpdatePassword(APIView):
+    def post(self, request):
+        serializer_class = getPasswordSerializer(data = request.data)
+
+        if serializer_class.is_valid():
+                password = serializer_class.validated_data['password']
+                gmail = serializer_class.validated_data['gmail']
+                user = CustomUser.objects.get(email=gmail)
+                user.set_password(password)
+                user.save()
+                return Response({'message':'password changed successfully...'})
+        else:
+                print('Error')
+
+class ResendMail(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer_class = GetMailSerializer(data = request.data)
+        if serializer_class.is_valid():
+            gmail = serializer_class.validated_data['gmail']
+            subject = 'Your HTML Welcome'
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to = [gmail]
+            otp = random.randint(100000, 999999)
+            request.session['otp'] = otp
+            request.session.save()
+#             result = send_mail(
+
+#   'Reset Password',
+
+#   f"This is 6 digit otp {123456} to reset the password.",
+
+#   settings.EMAIL_HOST_USER, # Sender must be your configured Gmail address
+
+#   [gmail], # Your actual recipient address
+
+#   fail_silently=False, # Crucial: forces an exception if the SMTP connection fails
+
+# )
+    # Render HTML template (assuming you have one at 'email/welcome.html')
+    # Or you can define the HTML directly as a string
+            # html_content = render_to_string('templates/mail.html', {'username': 'User'})
+            html_content = render_to_string('mail.html', {'username': gmail, 'otp':otp})
+    # # Create a plain text version for non-HTML email clients
+            text_content = strip_tags(html_content) 
+
+    # # 2. Create the message object
+            msg = EmailMultiAlternatives('Password Reset', f"This is the 6 digit otp to rest your password", from_email, to)
+    
+    # # 3. Attach the HTML version
+            msg.attach_alternative(html_content, "text/html")
+    
+    # # 4. Send the email
+            msg.send(fail_silently=False)
+            return Response({'message':'Mail sent successfully...'})
+        return Response({'message':'Error...'})
