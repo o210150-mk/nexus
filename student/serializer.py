@@ -21,6 +21,7 @@ class StudentTempSerializer(serializers.ModelSerializer):
         model = Student
         fields = '__all__'
     
+
 class GetMailSerializer(serializers.Serializer):
     gmail = serializers.EmailField()
 

@@ -163,6 +163,8 @@ class CreateUsers(APIView):
             )
             user.save()
         return Response({'message':f"Successfully created : User Logins"})
+    
+    
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string 
 from django.conf import settings
@@ -200,15 +202,16 @@ class GetMail(APIView):
             html_content = render_to_string('mail.html', {'username': gmail, 'otp':otp})
     # # Create a plain text version for non-HTML email clients
             text_content = strip_tags(html_content) 
-
+            print('1')
     # # 2. Create the message object
             msg = EmailMultiAlternatives('Password Reset', f"This is the 6 digit otp to rest your password", from_email, to)
-    
+            print('2')
     # # 3. Attach the HTML version
             msg.attach_alternative(html_content, "text/html")
-    
+            print('3')
     # # 4. Send the email
             msg.send(fail_silently=False)
+            print('4')
             return Response({'message':'Mail sent successfully...'})
         return Response({'message':'Error...'})
     

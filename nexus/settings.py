@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'student',
+    'faculty',
     'rest_framework',
     'corsheaders'
 ]
@@ -130,8 +131,8 @@ REST_FRAMEWORK = {
 }
 
 
-CORS_ALLOWED_ORIGINS = ["http://10.201.132.189:5173"]
-CSRF_TRUSTED_ORIGINS = ["http://10.201.132.189:5173", "http://localhost:5171", "http://127.0.0.1:5173"]
+CORS_ALLOWED_ORIGINS = ["http://10.31.208.189:5173","https://sparlike-neurally-pa.ngrok-free.dev"]
+CSRF_TRUSTED_ORIGINS = ["http://10.31.208.189:5173", "http://localhost:5173", "http://127.0.0.1:5173","https://sparlike-neurally-pa.ngrok-free.dev"]
 
 CORS_ALLOW_CREDENTIALS = True
 
