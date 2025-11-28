@@ -13,6 +13,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializer import CustomTokenObtainPairSerializer
 
 # class ReactView(APIView):
   
@@ -33,18 +36,49 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 def is_student(user):
     return user.role == 'STUDENT'
 
-@method_decorator(login_required, name='dispatch')
-@method_decorator(user_passes_test(is_student), name='dispatch')
+# @method_decorator(login_required, name='dispatch')
+# @method_decorator(user_passes_test(is_student), name='dispatch')
+# class StudentView(APIView):
+#     def get(self, request):
+#         serializer_class = StudentSerializer
+#         try:
+#             data = Student.objects.get(gmail = request.user)
+#             data = serializer_class(data)
+#             return Response(data.data)
+#         except:
+#             return Response({'message':'Invalid role accesss...'})
+
 class StudentView(APIView):
+    # This automatically enforces JWT validation and populates request.user
+    permission_classes = [IsAuthenticated] 
+
     def get(self, request):
+        # 1. ENFORCE ROLE CHECK
+        if request.user.role != 'STUDENT':
+            return Response(
+                {'message': 'Access Denied: Only Students can view this data.'},
+                status=status.HTTP_403_FORBIDDEN # Use 403 Forbidden for insufficient permissions
+            )
+        
+        # 2. GET DATA
         serializer_class = StudentSerializer
         try:
-            data = Student.objects.get(gmail = request.user)
+            # request.user is available thanks to JWTAuthentication
+            data = Student.objects.get(gmail=request.user.email) 
             data = serializer_class(data)
             return Response(data.data)
-        except:
-            return Response({'message':'Invalid role accesss...'})
-
+        except Student.DoesNotExist:
+            return Response(
+                {'message': 'Student record not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception:
+             # Catching a generic exception is often bad, but for unknown issues, 
+             # return a generic error or log it.
+             return Response(
+                {'message': 'An unexpected error occurred.'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+             )
 
 # @method_decorator(login_required, name='dispatch')
 # class StudentView(APIView):
@@ -55,41 +89,60 @@ class StudentView(APIView):
 #         data = serializer_class(data)
 #         return Response(data.data)
 
-class LogView(APIView):
-    authentication_classes = [SessionAuthentication]
-    def post(self, request):
-        serializer = LogSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            password = serializer.validated_data['password']
-            user = authenticate(request, username=email, password=password)
-            if user is not None:
-                login(request, user)
-                return Response({'message': 'Login successful','is_authenticated':True,'role':request.user.role,}, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'Invalid credentials','is_authenticated':False}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response({'error': 'Invalid credentials','is_authenticated':False}, status=status.HTTP_401_UNAUTHORIZED)
-    def get(self, request):
-        if request.user.is_authenticated:
-            return Response({
-                'is_authenticated':True,
-                'role':request.user.role,
-                'message': 'user logged successfully',
-            })
-        else:
-            return Response({
-                'is_authenticated':False,
-                'role':'NULL',
-                'message': 'user not logged',
-            })
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+# class LogView(APIView):
+#     authentication_classes = [SessionAuthentication]
+#     def post(self, request):
+#         serializer = LogSerializer(data=request.data)
+#         if serializer.is_valid():
+#             email = serializer.validated_data['email']
+#             password = serializer.validated_data['password']
+#             user = authenticate(request, username=email, password=password)
+#             if user is not None:
+#                 login(request, user)
+#                 return Response({'message': 'Login successful','is_authenticated':True,'role':request.user.role,}, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({'error': 'Invalid credentials','is_authenticated':False}, status=status.HTTP_401_UNAUTHORIZED)
+#         else:
+#             return Response({'error': 'Invalid credentials','is_authenticated':False}, status=status.HTTP_401_UNAUTHORIZED)
+#     def get(self, request):
+#         if request.user.is_authenticated:
+#             return Response({
+#                 'is_authenticated':True,
+#                 'role':request.user.role,
+#                 'message': 'user logged successfully',
+#             })
+#         else:
+#             return Response({
+#                 'is_authenticated':False,
+#                 'role':'NULL',
+#                 'message': 'user not logged',
+#             })
         
 
+# class outView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     def post(self, request):
+#         logout(request)
+#         return Response({'Message':'Logged out successfully'})
+
 class outView(APIView):
-    permission_classes = [IsAuthenticated]
+    # This view automatically checks the JWT header thanks to settings.py
+    permission_classes = [IsAuthenticated] 
+
     def post(self, request):
-        logout(request)
-        return Response({'Message':'Logged out successfully'})
+        try:
+            # Get the Refresh Token from the request body (client must send it)
+            refresh_token = request.data["refresh"] 
+            token = RefreshToken(refresh_token)
+            token.blacklist() # Blacklist the token, revoking its ability to refresh
+
+            return Response({'Message':'Logged out and token blacklisted successfully'}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            # Handle cases where the token is invalid or missing
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class uploadView(APIView):
@@ -294,17 +347,38 @@ class GetResults(APIView):
         print(student_idno)
         print(student)
         print(year_sem)
-        if year_sem == 'E3_S1':
+        if year_sem == 'E1_S1':
+                data = ResultE1S1.objects.filter(student = student)
+        elif year_sem == 'E1_S2':
+                data = ResultE1S2.objects.filter(student = student)
+        elif year_sem == 'E2_S1':
+                data = ResultE2S1.objects.filter(student = student)
+        elif year_sem == 'E2_S2':
+                data = ResultE2S2.objects.filter(student = student)
+        elif year_sem == 'E3_S1':
                 data = ResultE3S1.objects.filter(student = student)
-
+        elif year_sem == 'E3_S2':
+                data = ResultE3S2.objects.filter(student = student)
+        elif year_sem == 'E4_S1':
+                data = ResultE4S1.objects.filter(student = student)
+        elif year_sem == 'E4_S2':
+                data = ResultE4S2.objects.filter(student = student)
+        elif year_sem == 'PUC1_S1':
+                data = ResultP1S1.objects.filter(student = student)
+        elif year_sem == 'PUC1_S2':
+                data = ResultP1S2.objects.filter(student = student)
+        elif year_sem == 'PUC2_S1':
+                data = ResultP2S1.objects.filter(student = student)
+        elif year_sem == 'PUC2_S2':
+                data = ResultP2S2.objects.filter(student = student)
         serializer = ResultE3S1Serializer(data, many=True)
         for item in serializer.data:
-            bo2 = sum(item.mid1,item.mid2,item.mid3) - min(item.mid1,item.mid2,item.mid3)
-            subject = SubjectInfo.objects.get(subject_code = item.subject)
+            midterm_scores = [item['mid1'], item['mid2'], item['mid3']]
+            bo2 = sum(midterm_scores) - min(midterm_scores)
+            subject = SubjectInfo.objects.get(subject_code = item['subject'])
             subjectName = subject.name
             subjectCredits = subject.credits
-            new_data = {'credits':subjectCredits, 'subject':subjectName}
+            new_data = {'credits':subjectCredits, 'subject':subjectName, 'bo2':bo2}
             item.update(new_data)
-        return Response({'message':'response'})
-    
-        
+        print(serializer.data)
+        return Response({'message':'response', 'data':serializer.data})

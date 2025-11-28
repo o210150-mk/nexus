@@ -1,3 +1,4 @@
 cors-headers
 reast framework
 openpyxl
+pip install djangorestframework-simplejwt

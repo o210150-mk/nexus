@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,7 +43,9 @@ INSTALLED_APPS = [
     'faculty',
     'results',
     'rest_framework',
-    'corsheaders'
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 MIDDLEWARE = [
@@ -126,9 +129,20 @@ USE_TZ = True
 # add1 start
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny'
+        'rest_framework.permissions.IsAuthenticated',
     ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',), # Common for JWT
 }
 
 
@@ -137,17 +151,17 @@ CSRF_TRUSTED_ORIGINS = ["http://10.123.180.189:5173", "http://localhost:5173", "
 
 CORS_ALLOW_CREDENTIALS = True
 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
+# SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
 
-SESSION_COOKIE_SECURE = False
+# SESSION_COOKIE_SECURE = False
 
-SESSION_COOKIE_SAMESITE = 'Lax'
+# SESSION_COOKIE_SAMESITE = 'Lax'
 
-CSRF_COOKIE_SAMESITE = 'Lax'
+# CSRF_COOKIE_SAMESITE = 'Lax'
 
-CSRF_COOKIE_SECURE = False
+# CSRF_COOKIE_SECURE = False
 
 AUTH_USER_MODEL = 'student.CustomUser'
 

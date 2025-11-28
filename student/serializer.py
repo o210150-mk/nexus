@@ -40,3 +40,18 @@ class ResultE3S1Serializer(serializers.ModelSerializer):
     class Meta:
         model = ResultE1S1
         fields = '__all__'
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        # This code puts the role INSIDE the JWT access token
+        token = super().get_token(user)
+        token['role'] = user.role # Assuming 'user.role' is correct from your model
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['role'] = self.user.role 
+        return data
