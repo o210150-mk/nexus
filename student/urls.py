@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from student.views import StudentView, uploadView, CreateUsers, GetMail, VerifyOtp, UpdatePassword, ResendMail
+from student.views import StudentView, uploadView, CreateUsers, GetMail, VerifyOtp, UpdatePassword, ResendMail, GetResults
 
 urlpatterns = [
     path('profile/', StudentView.as_view(), name='std_profile'),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('verify-otp/', VerifyOtp.as_view(), name='verify-otp'),
     path('reset-password/', UpdatePassword.as_view(), name='reset-password'),
     path('resend-otp/', ResendMail.as_view(), name='resend-otp'),
+    path('get-results/',GetResults.as_view(), name='get-result')
 ]

@@ -3,6 +3,7 @@ from django.shortcuts import render
 import pandas as pd
 from rest_framework.views import APIView
 from . models import *
+from results.models import *
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from rest_framework.authentication import SessionAuthentication
@@ -202,16 +203,12 @@ class GetMail(APIView):
             html_content = render_to_string('mail.html', {'username': gmail, 'otp':otp})
     # # Create a plain text version for non-HTML email clients
             text_content = strip_tags(html_content) 
-            print('1')
     # # 2. Create the message object
             msg = EmailMultiAlternatives('Password Reset', f"This is the 6 digit otp to rest your password", from_email, to)
-            print('2')
     # # 3. Attach the HTML version
             msg.attach_alternative(html_content, "text/html")
-            print('3')
     # # 4. Send the email
             msg.send(fail_silently=False)
-            print('4')
             return Response({'message':'Mail sent successfully...'})
         return Response({'message':'Error...'})
     
@@ -235,6 +232,7 @@ class UpdatePassword(APIView):
         if serializer_class.is_valid():
                 password = serializer_class.validated_data['password']
                 gmail = serializer_class.validated_data['gmail']
+                print(password)
                 user = CustomUser.objects.get(email=gmail)
                 user.set_password(password)
                 user.save()
@@ -284,3 +282,29 @@ class ResendMail(APIView):
             msg.send(fail_silently=False)
             return Response({'message':'Mail sent successfully...'})
         return Response({'message':'Error...'})
+
+class GetResults(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        year_sem = request.GET.get('year_sem')
+        result = []
+        data = []
+        student_idno = str(request.user).split('@')[0]
+        student = Student.objects.get(idNo = student_idno)
+        print(student_idno)
+        print(student)
+        print(year_sem)
+        if year_sem == 'E3_S1':
+                data = ResultE3S1.objects.filter(student = student)
+
+        serializer = ResultE3S1Serializer(data, many=True)
+        for item in serializer.data:
+            bo2 = sum(item.mid1,item.mid2,item.mid3) - min(item.mid1,item.mid2,item.mid3)
+            subject = SubjectInfo.objects.get(subject_code = item.subject)
+            subjectName = subject.name
+            subjectCredits = subject.credits
+            new_data = {'credits':subjectCredits, 'subject':subjectName}
+            item.update(new_data)
+        return Response({'message':'response'})
+    
+        

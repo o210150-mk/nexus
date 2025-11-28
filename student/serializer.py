@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from . models import *
+from results.models import ResultE1S1
 
 class LogSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -31,3 +32,11 @@ class VerifySerializer(serializers.Serializer):
 class getPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(max_length = 15)
     gmail = serializers.EmailField()
+
+class LogSerializer(serializers.Serializer):
+    year_sem = serializers.CharField(max_length = 10)
+
+class ResultE3S1Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResultE1S1
+        fields = '__all__'
