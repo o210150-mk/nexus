@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from student.models import Student
 
@@ -63,14 +64,17 @@ class ResultE1S1(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E1-SEM1"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
+    
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -107,14 +111,16 @@ class ResultE1S2(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E1-SEM2"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -151,14 +157,16 @@ class ResultE2S1(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E2-SEM1"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -195,14 +203,16 @@ class ResultE2S2(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E2-SEM2"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -239,14 +249,16 @@ class ResultE3S1(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E3-SEM1"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -283,14 +295,16 @@ class ResultE3S2(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E3-SEM2"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -327,14 +341,16 @@ class ResultE4S1(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E4-SEM1"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -371,14 +387,16 @@ class ResultE4S2(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "E4-SEM2"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -415,14 +433,16 @@ class ResultP1S1(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "PUC1-SEM1"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -459,14 +479,16 @@ class ResultP1S2(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "PUC1-SEM2"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -503,14 +525,16 @@ class ResultP2S1(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "PUC2-SEM1"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"
@@ -547,14 +571,16 @@ class ResultP2S2(models.Model):
     grade = models.CharField(max_length=2, null=True, blank=True, help_text="Final grade received for the subject.")
     
     # Year the student passed the subject
-    year_of_pass = models.IntegerField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025")
+    year_of_pass = models.CharField(null=True, blank=True, help_text=" MMYY ; ex - 0125 : january 2025", max_length=4)
+
+    bulk = models.DateField(default = datetime.date.today)
 
     # Optional: Define a composite primary key or unique constraint
     class Meta:
         # Ensures that a student can only have ONE enrollment record per subject
-        unique_together = ('student', 'subject') 
+        unique_together = ('student', 'subject', 'year_of_pass') 
         verbose_name_plural = "PUC2-SEM2"
-        ordering = ['student', 'subject']
+        ordering = ['student', 'subject', 'year_of_pass']
 
     def __str__(self):
         return f"Enrollment for {self.student.idNo} in {self.subject.subject_code}"

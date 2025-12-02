@@ -305,30 +305,10 @@ class ResendMail(APIView):
             otp = random.randint(100000, 999999)
             request.session['otp'] = otp
             request.session.save()
-#             result = send_mail(
-
-#   'Reset Password',
-
-#   f"This is 6 digit otp {123456} to reset the password.",
-
-#   settings.EMAIL_HOST_USER, # Sender must be your configured Gmail address
-
-#   [gmail], # Your actual recipient address
-
-#   fail_silently=False, # Crucial: forces an exception if the SMTP connection fails
-
-# )
-    # Render HTML template (assuming you have one at 'email/welcome.html')
-    # Or you can define the HTML directly as a string
-            # html_content = render_to_string('templates/mail.html', {'username': 'User'})
             html_content = render_to_string('mail.html', {'username': gmail, 'otp':otp})
-    # # Create a plain text version for non-HTML email clients
             text_content = strip_tags(html_content) 
-
-    # # 2. Create the message object
             msg = EmailMultiAlternatives('Password Reset', f"This is the 6 digit otp to rest your password", from_email, to)
     
-    # # 3. Attach the HTML version
             msg.attach_alternative(html_content, "text/html")
     
     # # 4. Send the email
@@ -344,9 +324,6 @@ class GetResults(APIView):
         data = []
         student_idno = str(request.user).split('@')[0]
         student = Student.objects.get(idNo = student_idno)
-        print(student_idno)
-        print(student)
-        print(year_sem)
         if year_sem == 'E1_S1':
                 data = ResultE1S1.objects.filter(student = student)
         elif year_sem == 'E1_S2':
@@ -380,5 +357,12 @@ class GetResults(APIView):
             subjectCredits = subject.credits
             new_data = {'credits':subjectCredits, 'subject':subjectName, 'bo2':bo2}
             item.update(new_data)
-        print(serializer.data)
-        return Response({'message':'response', 'data':serializer.data})
+
+        split_data = {}
+
+        for item in serializer.data:
+            year = item['year_of_pass']
+            if year not in split_data:
+                split_data[year] = []
+            split_data[year].append(item)
+        return Response({'message':'response', 'data':split_data})

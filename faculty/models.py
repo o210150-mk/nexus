@@ -92,6 +92,11 @@ class ClassDetails(models.Model):
         verbose_name='Faculty In-Charge'
     )
 
+    subject = models.CharField(
+        max_length=100,
+        verbose_name='Subject Name'
+    )
+
     def __str__(self):
         # Displays the full description for readability
         year_display = dict(self.YEAR_CHOICES).get(self.year, self.year)
