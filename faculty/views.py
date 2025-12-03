@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from rest_framework.authentication import SessionAuthentication
 from . serializer import *
 from rest_framework import status
+from student.permissions import IsAdmin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -17,7 +18,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 # Create your views here.
 
 class uploadFaculty(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
         # serializer_class = ExcelUploadSerializer
         # serializer = serializer_class(data=request.data)
@@ -64,7 +65,7 @@ class uploadFaculty(APIView):
             )
 
 class SaveFaculty(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
         data = Faculty.objects.filter(verified = False)
         User = get_user_model() 
@@ -85,7 +86,7 @@ class SaveFaculty(APIView):
         )
     
 class facultyAllotment(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
         # serializer_class = ExcelUploadSerializer
         # serializer = serializer_class(data=request.data)
@@ -114,7 +115,8 @@ class facultyAllotment(APIView):
                     year =row['YEAR'], 
                     sem = row['SEM'],
                     class_name = row['CLASS'],
-                    faculty = faculty_instance
+                    faculty = faculty_instance,
+                    subject = row['SUBJECT']
                 )
             
             class_details.append(item)

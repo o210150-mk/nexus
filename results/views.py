@@ -10,13 +10,14 @@ from rest_framework.authentication import SessionAuthentication
 from student.serializer import *
 from results.serializer import *
 from rest_framework import status
+from student.permissions import IsAdmin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class UploadSubjectInfo(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
         # serializer_class = ExcelUploadSerializer
         # serializer = serializer_class(data=request.data)
@@ -39,12 +40,14 @@ class UploadSubjectInfo(APIView):
             # Iterate over the DataFrame rows
         for index, row in df.iterrows():
                 # **IMPORTANT:** Match column names exactly from your Excel file
+            print(row['CREDITS'])
             item = SubjectInfo(
                     subject_code = row['SUBJECT CODE'], 
                     name = row['NAME'],
                     credits = row['CREDITS'],
                     year = row['YEAR']
                 )
+            print(item.credits)
             subjects_to_add.append(item)
 
             # 3. Store data in the database using bulk_create (efficient)
@@ -59,7 +62,7 @@ class UploadSubjectInfo(APIView):
             )
 
 class UploadResult(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def post(self, request):
         serializer = ResultUploadSerializer(data=request.data)

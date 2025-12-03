@@ -131,10 +131,11 @@ USE_TZ = True
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication', # Keep SessionAuth for the browsable API/if needed
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    )
 }
 
 SIMPLE_JWT = {
@@ -146,8 +147,8 @@ SIMPLE_JWT = {
 }
 
 
-CORS_ALLOWED_ORIGINS = ["http://10.123.180.189:5173"]
-CSRF_TRUSTED_ORIGINS = ["http://10.123.180.189:5173", "http://localhost:5173"]
+CORS_ALLOWED_ORIGINS = ["http://10.179.124.189:5173"]
+CSRF_TRUSTED_ORIGINS = ["http://10.179.124.189:5173", "http://localhost:5173"]
 
 CORS_ALLOW_CREDENTIALS = True
 

@@ -18,10 +18,7 @@ class SubjectInfo(models.Model):
         help_text="The full name of the subject."
     )
     
-    # Credits of the subject (Assuming an integer value like 3 or 4)
-    credits = models.IntegerField(
-        help_text="The credit weight for the subject."
-    )
+    credits = models.DecimalField(max_digits=4, decimal_places=2)
 
     year = models.CharField(
         max_length=5,

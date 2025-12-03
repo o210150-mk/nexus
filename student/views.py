@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from .permissions import IsStudent, IsAdmin
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializer import CustomTokenObtainPairSerializer
@@ -50,8 +51,7 @@ def is_student(user):
 
 class StudentView(APIView):
     # This automatically enforces JWT validation and populates request.user
-    permission_classes = [IsAuthenticated] 
-
+    permission_classes = [IsAuthenticated, IsStudent] 
     def get(self, request):
         # 1. ENFORCE ROLE CHECK
         if request.user.role != 'STUDENT':
@@ -146,7 +146,7 @@ class outView(APIView):
 
 
 class uploadView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
         # serializer_class = ExcelUploadSerializer
         # serializer = serializer_class(data=request.data)
@@ -170,7 +170,8 @@ class uploadView(APIView):
             # Iterate over the DataFrame rows
         for index, row in df.iterrows():
                 # **IMPORTANT:** Match column names exactly from your Excel file
-            product = Student_temp(
+            
+            product = Student(
                     name=row['NAME'], 
                     rollNo = row['ROLL NO'],
                     idNo = row['ID NO'],
@@ -182,33 +183,41 @@ class uploadView(APIView):
                     parentMobile = row['PARENT MOBILE'],
                     address = row['ADDRESS'],
                     gmail = row['GMAIL'],
-                    hallTicketNo = row['HALLTICKET NO']
+                    hallTicketNo = row['HALLTICKET NO'],
+                    section = row['SECTION'],
+                    guardian = row['GUARDIAN'],
+                    dob = row['DATE OF BIRTH'],
+                    hostelName = row['HOSTEL NAME'],
+                    roomNo = row['ROOM NO'],
+                    batch = str(row['ID NO'])[:3],
+                    bloodGroup = row['BLOOD GROUP'],
+                    verified = False
                 )
             users_to_create.append(product)
 
-
             # 3. Store data in the database using bulk_create (efficient)
-        Student_temp.objects.bulk_create(
+        Student.objects.bulk_create(
                 users_to_create, 
                 ignore_conflicts=True # Skips rows that violate unique constraints (e.g., duplicate SKU)
             )
-        data = Student_temp.objects.all()
-        serializer_class = StudentTempSerializer
+        data = Student.objects.filter(verified = False)
+        serializer_class = StudentSerializer
         data = serializer_class(data, many=True)
+        print(data.data)
         return Response(
                 {"message": f"Successfully uploaded and stored {len(users_to_create)} records.", 'data':data.data},
                 status=status.HTTP_201_CREATED
             )
     
 class CreateUsers(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
-        data = list(Student_temp.objects.all())
+        data = list(Student.objects.filter(verified = False))[:10]
         User = get_user_model() 
         for dat in data:
             gamil = dat.gmail
-            Student(name = dat.name, rollNo =dat.rollNo, idNo = dat.idNo, gender = dat.gender, branch = dat.branch,fatherName = dat.fatherName, motherName = dat.motherName, studentMobile = dat.studentMobile, parentMobile = dat.parentMobile, address = dat.address, gmail = dat.gmail, hallTicketNo =dat.hallTicketNo).save()
-            dat.delete()
+            dat.verified = True
+            dat.save()
             passsword = 'rgukt123'
             user = User.objects.create_user(
                 email = gamil,
@@ -279,6 +288,7 @@ class VerifyOtp(APIView):
             )
 
 class UpdatePassword(APIView):
+    permission_classes = [IsAuthenticated] 
     def post(self, request):
         serializer_class = getPasswordSerializer(data = request.data)
 
@@ -317,7 +327,7 @@ class ResendMail(APIView):
         return Response({'message':'Error...'})
 
 class GetResults(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsStudent]
     def get(self, request):
         year_sem = request.GET.get('year_sem')
         result = []
