@@ -18,36 +18,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializer import CustomTokenObtainPairSerializer
 
-# class ReactView(APIView):
-  
-#     serializer_class = ReactSerializer
-
-#     def get(self, request):
-#         detail = [ {"name": detail.name,"detail": detail.detail} 
-#         for detail in React.objects.all()]
-#         return Response(detail)
-
-#     def post(self, request):
-
-#         serializer = ReactSerializer(data=request.data)
-#         if serializer.is_valid(raise_exception=True):
-#             serializer.save()
-#             return  Response(serializer.data)
-
 def is_student(user):
     return user.role == 'STUDENT'
 
-# @method_decorator(login_required, name='dispatch')
-# @method_decorator(user_passes_test(is_student), name='dispatch')
-# class StudentView(APIView):
-#     def get(self, request):
-#         serializer_class = StudentSerializer
-#         try:
-#             data = Student.objects.get(gmail = request.user)
-#             data = serializer_class(data)
-#             return Response(data.data)
-#         except:
-#             return Response({'message':'Invalid role accesss...'})
 
 class StudentView(APIView):
     # This automatically enforces JWT validation and populates request.user
@@ -80,53 +53,11 @@ class StudentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
              )
 
-# @method_decorator(login_required, name='dispatch')
-# class StudentView(APIView):
-#     def get(self, request):
-#         serializer_class = StudentSerializer
-#         print(request.user)
-#         data = Student.objects.get(gmail = request.user)
-#         data = serializer_class(data)
-#         return Response(data.data)
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
-# class LogView(APIView):
-#     authentication_classes = [SessionAuthentication]
-#     def post(self, request):
-#         serializer = LogSerializer(data=request.data)
-#         if serializer.is_valid():
-#             email = serializer.validated_data['email']
-#             password = serializer.validated_data['password']
-#             user = authenticate(request, username=email, password=password)
-#             if user is not None:
-#                 login(request, user)
-#                 return Response({'message': 'Login successful','is_authenticated':True,'role':request.user.role,}, status=status.HTTP_200_OK)
-#             else:
-#                 return Response({'error': 'Invalid credentials','is_authenticated':False}, status=status.HTTP_401_UNAUTHORIZED)
-#         else:
-#             return Response({'error': 'Invalid credentials','is_authenticated':False}, status=status.HTTP_401_UNAUTHORIZED)
-#     def get(self, request):
-#         if request.user.is_authenticated:
-#             return Response({
-#                 'is_authenticated':True,
-#                 'role':request.user.role,
-#                 'message': 'user logged successfully',
-#             })
-#         else:
-#             return Response({
-#                 'is_authenticated':False,
-#                 'role':'NULL',
-#                 'message': 'user not logged',
-#             })
-        
-
-# class outView(APIView):
-#     permission_classes = [IsAuthenticated]
-#     def post(self, request):
-#         logout(request)
-#         return Response({'Message':'Logged out successfully'})
 
 class outView(APIView):
     # This view automatically checks the JWT header thanks to settings.py
@@ -148,20 +79,11 @@ class outView(APIView):
 class uploadView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
-        # serializer_class = ExcelUploadSerializer
-        # serializer = serializer_class(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-
-        # excel_file = serializer.validated_data['excel_file']
 
         serializer = ExcelUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         excel_file = serializer.validated_data['excel_file']
-
-
-            # 1. Read the Excel file into a pandas DataFrame
-            # The uploaded file is in memory, so we pass it directly.
-            # Assuming the first sheet has the data and the first row is the header.
+        # 1. Read Excel file into a DataFrame
         df = pd.read_excel(excel_file, sheet_name=0) 
 
             # 2. Prepare data for bulk creation
@@ -233,48 +155,66 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
+# In your views.py
+# In your views.py
+
+# Import the new function
+from .task import send_otp_email_async 
+# ... other imports
 
 class GetMail(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         serializer_class = GetMailSerializer(data = request.data)
+        
         if serializer_class.is_valid():
             gmail = serializer_class.validated_data['gmail']
-            subject = 'Your HTML Welcome'
-            from_email = settings.DEFAULT_FROM_EMAIL
-            to = [gmail]
-#             result = send_mail(
-
-#   'Reset Password',
-
-#   f"This is 6 digit otp {123456} to reset the password.",
-
-#   settings.EMAIL_HOST_USER, # Sender must be your configured Gmail address
-
-#   [gmail], # Your actual recipient address
-
-#   fail_silently=False, # Crucial: forces an exception if the SMTP connection fails
-
-# )
-    # Render HTML template (assuming you have one at 'email/welcome.html')
-    # Or you can define the HTML directly as a string
-            # html_content = render_to_string('templates/mail.html', {'username': 'User'})
+            
             otp = random.randint(100000, 999999)
             request.session['otp'] = otp
+            request.session['mail'] = gmail
             request.session.save()
-            html_content = render_to_string('mail.html', {'username': gmail, 'otp':otp})
-    # # Create a plain text version for non-HTML email clients
-            text_content = strip_tags(html_content) 
-    # # 2. Create the message object
-            msg = EmailMultiAlternatives('Password Reset', f"This is the 6 digit otp to rest your password", from_email, to)
-    # # 3. Attach the HTML version
-            msg.attach_alternative(html_content, "text/html")
-    # # 4. Send the email
-            msg.send(fail_silently=False)
+            
+            # CALL THE THREADED FUNCTION (Immediately returns)
+            send_otp_email_async(gmail, otp) 
+            
+            # IMMEDIATE RESPONSE
             return Response({'message':'Mail sent successfully...'})
-        return Response({'message':'Error...'})
+        
+        return Response({'message':'Error...'}, status=status.HTTP_400_BAD_REQUEST)
+
+# Apply the same change to the ResendMail view.
+class ResendMail(APIView):
+    permission_classes = [AllowAny]
     
+    def post(self, request):
+        serializer_class = GetMailSerializer(data=request.data)
+        
+        if serializer_class.is_valid():
+            gmail = request.session['mail']
+            
+            # --- 1. Generate New OTP ---
+            otp = random.randint(100000, 999999)
+            
+            # --- 2. Save New OTP to Session ---
+            # This replaces the old OTP in the session
+            request.session['otp'] = str(otp) # Store as string for easy comparison later
+            request.session.save()
+            
+            # --- 3. Trigger Asynchronous Email Send ---
+            # This function uses threading to send the mail in the background, 
+            # allowing the API call to return immediately.
+            send_otp_email_async(gmail, otp)
+            
+            return Response({'message': 'New OTP mail sent successfully...'})
+        
+        # If serializer validation fails
+        return Response(
+            {'message': 'Error validating input.', 'errors': serializer_class.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )    
 class VerifyOtp(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer_class = VerifySerializer(data = request.data)
         if serializer_class.is_valid():
@@ -288,43 +228,22 @@ class VerifyOtp(APIView):
             )
 
 class UpdatePassword(APIView):
-    permission_classes = [IsAuthenticated] 
+    permission_classes = [AllowAny] 
     def post(self, request):
         serializer_class = getPasswordSerializer(data = request.data)
-
         if serializer_class.is_valid():
                 password = serializer_class.validated_data['password']
-                gmail = serializer_class.validated_data['gmail']
                 print(password)
-                user = CustomUser.objects.get(email=gmail)
+                user = CustomUser.objects.get(email=request.session['mail'])
                 user.set_password(password)
                 user.save()
+                print(request.session['otp'], " ",request.session['mail'])
+                del request.session['otp']
+                del request.session['mail']
                 return Response({'message':'password changed successfully...'})
         else:
                 print('Error')
 
-class ResendMail(APIView):
-    permission_classes = [AllowAny]
-    def post(self, request):
-        serializer_class = GetMailSerializer(data = request.data)
-        if serializer_class.is_valid():
-            gmail = serializer_class.validated_data['gmail']
-            subject = 'Your HTML Welcome'
-            from_email = settings.DEFAULT_FROM_EMAIL
-            to = [gmail]
-            otp = random.randint(100000, 999999)
-            request.session['otp'] = otp
-            request.session.save()
-            html_content = render_to_string('mail.html', {'username': gmail, 'otp':otp})
-            text_content = strip_tags(html_content) 
-            msg = EmailMultiAlternatives('Password Reset', f"This is the 6 digit otp to rest your password", from_email, to)
-    
-            msg.attach_alternative(html_content, "text/html")
-    
-    # # 4. Send the email
-            msg.send(fail_silently=False)
-            return Response({'message':'Mail sent successfully...'})
-        return Response({'message':'Error...'})
 
 class GetResults(APIView):
     permission_classes = [IsAuthenticated, IsStudent]

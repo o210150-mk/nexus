@@ -31,7 +31,6 @@ class VerifySerializer(serializers.Serializer):
 
 class getPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(max_length = 15)
-    gmail = serializers.EmailField()
 
 class LogSerializer(serializers.Serializer):
     year_sem = serializers.CharField(max_length = 10)
